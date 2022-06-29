@@ -1,0 +1,35 @@
+package com.fds.rest.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
+import javax.persistence.*;
+import java.util.List;
+
+@Entity
+@Table(name = "user")
+@Data
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column
+    private String userName;
+    @Column
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
+    @Column
+    private String name;
+    @Column
+    private boolean active;
+    @Column
+    private String googleName;
+    @Column
+    private String googleUserName;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_role", joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")})
+    private List<Role> roles;
+}
