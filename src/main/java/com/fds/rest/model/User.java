@@ -1,15 +1,17 @@
 package com.fds.rest.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fds.rest.model.enums.Status;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
 @Table(name = "user")
 @Data
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,6 +23,11 @@ public class User {
     private String password;
     @Column
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private Status status;
+
     @Column
     private boolean active;
     @Column
