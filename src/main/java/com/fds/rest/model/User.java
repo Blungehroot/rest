@@ -17,10 +17,9 @@ public class User implements Serializable {
     private Long id;
 
     @Column
-    private String userName;
-    @Column
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
     @Column
     private String name;
 
@@ -30,8 +29,10 @@ public class User implements Serializable {
 
     @Column
     private boolean active;
+
     @Column
     private String googleName;
+
     @Column
     private String googleUserName;
 
