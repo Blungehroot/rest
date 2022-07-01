@@ -1,7 +1,6 @@
 package com.fds.rest.config;
 
-import com.fds.rest.security.jwt.JwtConfigurer;
-import com.fds.rest.security.jwt.JwtTokenProvider;
+import com.fds.rest.security.oauth2.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,14 +13,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private final JwtTokenProvider jwtTokenProvider;
-
     private static final String LOGIN_ENDPOINT = "/api/v1/auth/login";
     private static final String REGISTRATION_ENDPOINT  = "/api/v1/auth/registration";
+    private CustomOAuth2UserService oauthUserService;
 
     @Autowired
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
+    public SecurityConfig(CustomOAuth2UserService oauthUserService) {
+        this.oauthUserService = oauthUserService;
     }
 
     @Bean
@@ -37,13 +35,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers(LOGIN_ENDPOINT).permitAll()
-                .antMatchers(REGISTRATION_ENDPOINT).permitAll()
+                .antMatchers(LOGIN_ENDPOINT, REGISTRATION_ENDPOINT).permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
                 .oauth2Login()
-                .and()
-                .apply(new JwtConfigurer(jwtTokenProvider));
+                .loginPage(LOGIN_ENDPOINT)
+                .userInfoEndpoint()
+                .userService(oauthUserService);
     }
 }

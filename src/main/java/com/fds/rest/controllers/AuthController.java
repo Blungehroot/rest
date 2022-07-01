@@ -3,7 +3,6 @@ package com.fds.rest.controllers;
 import com.fds.rest.dto.AuthentificationRequestDto;
 import com.fds.rest.model.User;
 import com.fds.rest.security.jwt.JwtTokenProvider;
-import com.fds.rest.services.UserService;
 import com.fds.rest.services.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
