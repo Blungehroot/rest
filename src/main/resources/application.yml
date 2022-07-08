@@ -1,0 +1,59 @@
+#postgres
+#spring:
+#  datasource: driver-class-name=org.postgresql.Driver
+#    url: jdbc:postgresql://${DATABASE_URL}:${DATABASE_PORT}/fds
+#    username: ${DATABASE_USER}
+#    password: ${DATABASE_PASSWORD}
+#    driver-class-name: org.postgresql.Driver
+
+#postgres local
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/trade_companies
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  profiles:
+    active: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: ${client.Id}
+            clientSecret: ${client.secret}
+            redirectUri: http://localhost:8080/oauth2/callback/google
+            scope:
+              - email
+              - profile
+              #- openid
+
+logging:
+  level:
+    root: info
+
+server:
+  error:
+    include-message: always
+
+
+app:
+  auth:
+    tokenSecret: ${token.secret}
+    tokenExpirationMsec: 864000000
+  oauth2:
+    # After successfully authenticating with the OAuth2 Provider,
+    # we'll be generating an auth token for the user and sending the token to the
+    # redirectUri mentioned by the client in the /oauth2/authorize request.
+    # We're not using cookies because they won't work well in mobile clients.
+    authorizedRedirectUris:
+      - http://localhost:8080/oauth2/redirect

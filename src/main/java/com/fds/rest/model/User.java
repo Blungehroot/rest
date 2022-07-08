@@ -1,40 +1,39 @@
 package com.fds.rest.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fds.rest.model.enums.Role;
 import com.fds.rest.model.enums.Status;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import java.io.Serializable;
-import java.util.List;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Data
+@RequiredArgsConstructor
 public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String name;
+
+    @Email
+    @Column(nullable = false)
+    private String email;
+
     @Column
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Column
-    private String name;
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column
+    @Enumerated(value = EnumType.STRING)
     private Status status;
-
-    @Column
-    private boolean active;
-
-    @Column
-    private String googleName;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_role", joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")})
-    private List<Role> roles;
+    
 }

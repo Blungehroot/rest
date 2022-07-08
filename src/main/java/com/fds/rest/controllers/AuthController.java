@@ -1,64 +1,65 @@
 package com.fds.rest.controllers;
 
-import com.fds.rest.dto.AuthentificationRequestDto;
+import com.fds.rest.exceptions.BadRequestException;
 import com.fds.rest.model.User;
+import com.fds.rest.model.dto.AuthenticationRequestDto;
 import com.fds.rest.security.jwt.JwtTokenProvider;
 import com.fds.rest.services.impl.UserServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping(value = "/api/v1/auth/")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider jwtTokenProvider;
     private final UserServiceImpl userService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
-    public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, UserServiceImpl userService) {
+
+    public AuthController(AuthenticationManager authenticationManager, UserServiceImpl userService, JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    @PostMapping(value = "registration")
-    public ResponseEntity<String> registration(@RequestBody User user) {
+    @PostMapping(value = "signup")
+    public ResponseEntity<?> signUp(@RequestBody User user) {
+        if (userService.findByEmail(user.getEmail()).isPresent()) {
+            throw new BadRequestException("Email address already in use.");
+        }
         userService.save(user);
-        return ResponseEntity.ok("User " + user.getName() + "successful registered");
+        return ResponseEntity.ok("User registered successfully");
     }
+
 
     @PostMapping(value = "login")
-    public ResponseEntity login(@RequestBody AuthentificationRequestDto authentificationRequestDto) {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authentificationRequestDto.getName(), authentificationRequestDto.getPassword()));
-            User user = userService.findByName(authentificationRequestDto.getName());
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequestDto req) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword()));
+        User user = userService.findByEmail(req.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not exist"));
+        String token = jwtTokenProvider.createToken(req.getEmail(), user.getRole().name());
+        Map<Object, Object> response = new HashMap<>();
+        response.put("email", req.getEmail());
+        response.put("token", token);
 
-            if (user == null) {
-                throw new UsernameNotFoundException("User with name: " + user.getName() + "  not found");
-            }
-
-            String token = jwtTokenProvider.createToken(user.getName(), user.getRoles());
-
-            Map<Object, Object> response = new HashMap<>();
-            response.put("name", user.getName());
-            response.put("token", token);
-
-            return ResponseEntity.ok(response);
-
-        } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid name or password");
-        }
+        return ResponseEntity.ok(response);
     }
+
+    @PostMapping(value = "logout")
+    public void authenticate(HttpServletRequest req, HttpServletResponse resp) {
+        SecurityContextLogoutHandler securityContextLogoutHandler = new SecurityContextLogoutHandler();
+        securityContextLogoutHandler.logout(req, resp, null);
+    }
+
 }

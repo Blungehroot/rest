@@ -3,11 +3,10 @@ package com.fds.rest.services;
 import com.fds.rest.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
-    User getById(Long id);
-
-    User findByName(String name);
+    Optional<User> findByEmail(String email);
 
     List<User> getAll();
 
@@ -16,4 +15,6 @@ public interface UserService {
     User update(User user);
 
     void deleteById(Long id);
+
+    User findById(Long id);
 }
