@@ -6,19 +6,23 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.Collection;
-import java.util.List;
+import java.nio.file.attribute.UserPrincipal;
+import java.util.*;
 
 @Data
-public class SecurityUser implements UserDetails {
+public class SecurityUser implements UserDetails, OAuth2User {
 
+    private final Long id;
     private final String username;
     private final String password;
-    private final List<SimpleGrantedAuthority> authorities;
+    private final Set<SimpleGrantedAuthority> authorities;
     private final boolean isActive;
+    private Map<String, Object> attributes;
 
-    public SecurityUser(String username, String password, List<SimpleGrantedAuthority> authorities, boolean isActive) {
+    public SecurityUser(Long id, String username, String password, Set<SimpleGrantedAuthority> authorities, boolean isActive) {
+        this.id = id;
         this.username = username;
         this.password = password;
         this.authorities = authorities;
@@ -28,6 +32,30 @@ public class SecurityUser implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
+
+    @Override
+    public String getName() {
+        return String.valueOf(id);
+    }
+
+    public static SecurityUser create(User user) {
+        return new SecurityUser(user.getId(), user.getName(), user.getPassword(), user.getRole().getAuthorities(), true);
+    }
+
+    public static SecurityUser create(User user, Map<String, Object> attributes) {
+        SecurityUser securityUser = SecurityUser.create(user);
+        securityUser.setAttributes(attributes);
+        return securityUser;
     }
 
     @Override

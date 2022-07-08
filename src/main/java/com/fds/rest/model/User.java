@@ -1,5 +1,6 @@
 package com.fds.rest.model;
 
+import com.fds.rest.model.enums.AuthProvider;
 import com.fds.rest.model.enums.Role;
 import com.fds.rest.model.enums.Status;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
@@ -35,5 +37,9 @@ public class User implements Serializable {
     @Column
     @Enumerated(value = EnumType.STRING)
     private Status status;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider;
     
 }
