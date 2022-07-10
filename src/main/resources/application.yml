@@ -57,3 +57,15 @@ app:
     # We're not using cookies because they won't work well in mobile clients.
     authorizedRedirectUris:
       - http://localhost:8080/oauth2/redirect
+
+fds:
+  urls:
+    baseUrl: http://localhost:8080/api/v1/companies-info/
+    topHighUrl: top-high-companies
+    topGreatChange: top-greatest-change-companies
+
+#fds:
+# urls:
+#    baseUrl: ${base.url}/api/v1/companies-info/
+#    topHighUrl: top-high-companies
+#    topGreatChange: top-greatest-change-companies

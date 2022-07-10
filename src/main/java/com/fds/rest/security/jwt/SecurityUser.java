@@ -6,13 +6,13 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.nio.file.attribute.UserPrincipal;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 @Data
-public class SecurityUser implements UserDetails, OAuth2User {
+public class SecurityUser implements UserDetails {
 
     private final Long id;
     private final String username;
@@ -32,30 +32,6 @@ public class SecurityUser implements UserDetails, OAuth2User {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
-    }
-
-    @Override
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(Map<String, Object> attributes) {
-        this.attributes = attributes;
-    }
-
-    @Override
-    public String getName() {
-        return String.valueOf(id);
-    }
-
-    public static SecurityUser create(User user) {
-        return new SecurityUser(user.getId(), user.getName(), user.getPassword(), user.getRole().getAuthorities(), true);
-    }
-
-    public static SecurityUser create(User user, Map<String, Object> attributes) {
-        SecurityUser securityUser = SecurityUser.create(user);
-        securityUser.setAttributes(attributes);
-        return securityUser;
     }
 
     @Override

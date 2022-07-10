@@ -2,6 +2,7 @@ package com.fds.rest.services.impl;
 
 
 import com.fds.rest.model.User;
+import com.fds.rest.model.enums.AuthProvider;
 import com.fds.rest.model.enums.Role;
 import com.fds.rest.model.enums.Status;
 import com.fds.rest.repository.UserRepository;
@@ -70,5 +71,20 @@ public class UserServiceImpl implements UserService {
     public void deleteById(Long id) {
         User user = findById(id);
         userRepository.delete(user);
+    }
+
+    public void processOAuthPostLogin(String email) {
+        Optional<User> existUser = userRepository.findByEmail(email);
+
+        if (existUser.isEmpty()) {
+            User newUser = new User();
+            newUser.setName(email.substring(0, email.indexOf("@")));
+            newUser.setEmail(email);
+            newUser.setProvider(AuthProvider.google);
+            newUser.setStatus(Status.ACTIVE);
+            newUser.setRole(Role.USER);
+
+            userRepository.save(newUser);
+        }
     }
 }

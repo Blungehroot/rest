@@ -1,9 +1,10 @@
 package com.fds.rest.config;
 
 import com.fds.rest.security.jwt.JwtConfigurer;
-import com.fds.rest.security.oauth2.CustomOauth2UserService;
-import com.fds.rest.security.oauth2.OAuth2AuthenticationFailureHandler;
-import com.fds.rest.security.oauth2.OAuth2AuthenticationSuccessHandler;
+import com.fds.rest.security.oauth2.CustomOAuth2User;
+import com.fds.rest.security.oauth2.CustomOAuth2UserService;
+import com.fds.rest.services.impl.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,8 +13,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -22,17 +31,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 )
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtConfigurer jwtConfigurer;
-    private final CustomOauth2UserService customOauth2UserService;
-    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
-    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
-    public SecurityConfig(JwtConfigurer jwtConfigurer, CustomOauth2UserService customOauth2UserService,
-                          OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler,
-                          OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler) {
+    @Autowired
+    private CustomOAuth2UserService oauthUserService;
+
+    @Autowired
+    private UserServiceImpl userService;
+
+    public SecurityConfig(JwtConfigurer jwtConfigurer) {
         this.jwtConfigurer = jwtConfigurer;
-        this.customOauth2UserService = customOauth2UserService;
-        this.oAuth2AuthenticationFailureHandler = oAuth2AuthenticationFailureHandler;
-        this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
     }
 
     @Override
@@ -44,7 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/")
+                .antMatchers("/", "/oauth/**")
                 .permitAll()
                 .antMatchers("/api/v1/auth/login", "/api/v1/auth/signup")
                 .permitAll()
@@ -61,10 +68,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .baseUri("/oauth2/callback/*")
                 .and()
                 .userInfoEndpoint()
-                .userService(customOauth2UserService)
+                .userService(oauthUserService)
                 .and()
-                .successHandler(oAuth2AuthenticationSuccessHandler)
-                .failureHandler(oAuth2AuthenticationFailureHandler);
+                .successHandler(new AuthenticationSuccessHandler() {
+
+                    @Override
+                    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                                        Authentication authentication) throws IOException, ServletException {
+
+                        CustomOAuth2User oauthUser = (CustomOAuth2User) authentication.getPrincipal();
+
+                        userService.processOAuthPostLogin(oauthUser.getEmail());
+
+                        response.sendRedirect("/api/v1/companies/top-high-companies");
+                    }
+                });
     }
 
     @Bean
@@ -77,6 +95,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
-
-
 }
