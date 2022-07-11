@@ -60,27 +60,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .apply(jwtConfigurer)
                 .and()
                 .oauth2Login()
-                .authorizationEndpoint()
-                .baseUri("/oauth2/authorize")
-                .and()
-                .redirectionEndpoint()
-                .baseUri("/oauth2/callback/*")
-                .and()
                 .userInfoEndpoint()
                 .userService(oauthUserService)
                 .and()
-                .successHandler(new AuthenticationSuccessHandler() {
+                .successHandler((request, response, authentication) -> {
 
-                    @Override
-                    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                                        Authentication authentication) throws IOException, ServletException {
+                    CustomOAuth2User oauthUser = (CustomOAuth2User) authentication.getPrincipal();
+                    userService.processOAuthPostLogin(oauthUser.getEmail());
 
-                        CustomOAuth2User oauthUser = (CustomOAuth2User) authentication.getPrincipal();
-
-                        userService.processOAuthPostLogin(oauthUser.getEmail());
-
-                        response.sendRedirect("/api/v1/companies/top-high-companies");
-                    }
+                    response.sendRedirect("/api/v1/companies/top-high-companies");
                 });
     }
 
