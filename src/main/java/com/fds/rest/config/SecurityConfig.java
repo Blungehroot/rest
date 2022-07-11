@@ -25,7 +25,8 @@ import java.io.IOException;
 @Configuration
 @EnableGlobalMethodSecurity(
         prePostEnabled = true,
-        securedEnabled = true
+        securedEnabled = true,
+        jsr250Enabled = true
 )
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtConfigurer jwtConfigurer;
