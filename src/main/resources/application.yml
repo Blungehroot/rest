@@ -60,7 +60,7 @@ app:
 
 fds:
   urls:
-    baseUrl: http://localhost:8080/api/v1/companies-info/
+    baseUrl: http://localhost:8081/api/v1/companies-info/
     topHighUrl: top-high-companies
     topGreatChange: top-greatest-change-companies
 
