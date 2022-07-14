@@ -4,6 +4,7 @@ import com.fds.rest.security.jwt.JwtConfigurer;
 import com.fds.rest.security.oauth2.CustomOAuth2User;
 import com.fds.rest.security.oauth2.CustomOAuth2UserService;
 import com.fds.rest.services.impl.UserServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +29,11 @@ import java.io.IOException;
         securedEnabled = true,
         jsr250Enabled = true
 )
+@Slf4j
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    private static final String LOGIN_ENDPOINT = "/api/v1/auth/login";
+    private static final String SIGN_UP_ENDPOINT = "/api/v1/auth/signup";
+
     private final JwtConfigurer jwtConfigurer;
 
     @Autowired
@@ -50,9 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/", "/oauth/**")
-                .permitAll()
-                .antMatchers("/api/v1/auth/login", "/api/v1/auth/signup")
+                .antMatchers(LOGIN_ENDPOINT, SIGN_UP_ENDPOINT)
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -64,11 +67,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .userService(oauthUserService)
                 .and()
                 .successHandler((request, response, authentication) -> {
-
                     CustomOAuth2User oauthUser = (CustomOAuth2User) authentication.getPrincipal();
                     userService.processOAuthPostLogin(oauthUser.getEmail());
 
-                    response.sendRedirect("/api/v1/companies/top-high-companies");
+                    response.sendRedirect("/api/v1/auth/success");
                 });
     }
 
