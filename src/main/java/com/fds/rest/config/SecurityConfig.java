@@ -33,7 +33,7 @@ import java.io.IOException;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String LOGIN_ENDPOINT = "/api/v1/auth/login";
     private static final String SIGN_UP_ENDPOINT = "/api/v1/auth/signup";
-
+    private static final String OAUTH2_ENDPOINT = "/login/oauth2/**";
     private final JwtConfigurer jwtConfigurer;
 
     @Autowired
@@ -55,7 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers(LOGIN_ENDPOINT, SIGN_UP_ENDPOINT)
+                .antMatchers(LOGIN_ENDPOINT, SIGN_UP_ENDPOINT, OAUTH2_ENDPOINT)
                 .permitAll()
                 .anyRequest()
                 .authenticated()

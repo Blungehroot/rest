@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.fds'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = "16"
 
 configurations {
 	compileOnly {
@@ -20,6 +20,8 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-parent:2.7.0'
+	implementation 'org.springframework.security:spring-security-oauth2-jose:5.7.2'
+	implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.6.8'
 	implementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
 	implementation 'org.springframework.boot:spring-boot-starter'
@@ -70,3 +72,4 @@ jar {
 test {
 	useJUnitPlatform()
 }
+targetCompatibility = JavaVersion.VERSION_16
