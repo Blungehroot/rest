@@ -30,6 +30,12 @@ public class User implements Serializable {
     @Column
     private String password;
 
+    @Column(nullable = false, name = "first_name")
+    private String firstName;
+
+    @Column(nullable = false, name = "last_name")
+    private String lastName;
+
     @Column
     @Enumerated(value = EnumType.STRING)
     private Role role;

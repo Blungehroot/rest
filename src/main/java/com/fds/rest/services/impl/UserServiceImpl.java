@@ -51,6 +51,8 @@ public class UserServiceImpl implements UserService {
             user.setRole(Role.USER);
             user.setStatus(Status.ACTIVE);
             user.setName(user.getEmail().substring(0, user.getEmail().indexOf("@")));
+            user.setFirstName(user.getFirstName());
+            user.setLastName(user.getLastName());
             userRepository.save(user);
         }
 
@@ -64,6 +66,8 @@ public class UserServiceImpl implements UserService {
         current.setId(user.getId());
         current.setName(user.getName());
         current.setPassword(passwordEncoder.encode(user.getPassword()));
+        current.setFirstName(user.getFirstName());
+        current.setLastName(user.getLastName());
         return userRepository.save(current);
     }
 

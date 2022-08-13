@@ -1,11 +1,7 @@
 package com.fds.rest.config;
 
 import com.fds.rest.security.jwt.JwtConfigurer;
-import com.fds.rest.security.oauth2.CustomOAuth2User;
-import com.fds.rest.security.oauth2.CustomOAuth2UserService;
-import com.fds.rest.services.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,15 +9,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Configuration
 @EnableGlobalMethodSecurity(
@@ -35,12 +24,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String SIGN_UP_ENDPOINT = "/api/v1/auth/signup";
     private static final String OAUTH2_ENDPOINT = "/login/oauth2/**";
     private final JwtConfigurer jwtConfigurer;
-
-    @Autowired
-    private CustomOAuth2UserService oauthUserService;
-
-    @Autowired
-    private UserServiceImpl userService;
 
     public SecurityConfig(JwtConfigurer jwtConfigurer) {
         this.jwtConfigurer = jwtConfigurer;
@@ -60,18 +43,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()
                 .authenticated()
                 .and()
-                .apply(jwtConfigurer)
-                .and()
-                .oauth2Login()
-                .userInfoEndpoint()
-                .userService(oauthUserService)
-                .and()
-                .successHandler((request, response, authentication) -> {
-                    CustomOAuth2User oauthUser = (CustomOAuth2User) authentication.getPrincipal();
-                    userService.processOAuthPostLogin(oauthUser.getEmail());
-
-                    response.sendRedirect("/api/v1/auth/success");
-                });
+                .apply(jwtConfigurer);
     }
 
     @Bean
