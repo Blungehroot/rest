@@ -5,6 +5,7 @@ import com.fds.rest.model.User;
 import com.fds.rest.model.dto.AuthenticationRequestDto;
 import com.fds.rest.security.jwt.JwtTokenProvider;
 import com.fds.rest.services.impl.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +24,8 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserServiceImpl userService;
     private final JwtTokenProvider jwtTokenProvider;
+    @Autowired
+    private KafkaController kafkaController;
 
 
     public AuthController(AuthenticationManager authenticationManager, UserServiceImpl userService, JwtTokenProvider jwtTokenProvider) {
@@ -36,7 +39,10 @@ public class AuthController {
         if (userService.findByEmail(user.getEmail()).isPresent()) {
             throw new BadRequestException("Email address already in use.");
         }
-        userService.save(user);
+        User current = userService.save(user);
+        kafkaController.sendMessageToKafkaTopic("email=" + current.getEmail() + ", " + "firstName=" + current.getFirstName()
+                + ", " + "lastName=" + current.getLastName());
+
         return ResponseEntity.ok("User registered successfully");
     }
 

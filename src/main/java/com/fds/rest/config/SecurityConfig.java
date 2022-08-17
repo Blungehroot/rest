@@ -23,6 +23,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String LOGIN_ENDPOINT = "/api/v1/auth/login";
     private static final String SIGN_UP_ENDPOINT = "/api/v1/auth/signup";
     private static final String OAUTH2_ENDPOINT = "/login/oauth2/**";
+    private static final String KAFKA_ENDPOINT = "/api/v1/kafka";
     private final JwtConfigurer jwtConfigurer;
 
     public SecurityConfig(JwtConfigurer jwtConfigurer) {
@@ -38,7 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers(LOGIN_ENDPOINT, SIGN_UP_ENDPOINT, OAUTH2_ENDPOINT)
+                .antMatchers(LOGIN_ENDPOINT, SIGN_UP_ENDPOINT, OAUTH2_ENDPOINT, KAFKA_ENDPOINT)
                 .permitAll()
                 .anyRequest()
                 .authenticated()
